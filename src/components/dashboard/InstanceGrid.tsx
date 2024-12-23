@@ -18,11 +18,12 @@ type SortBy =
   | "status"
   | "diskIO";
 type SortOrder = "asc" | "desc";
+type InstanceStatus = "healthy" | "warning" | "critical" | "offline";
 
 interface Instance {
   id: string;
   name: string;
-  status: string;
+  status: InstanceStatus;
   cpuUsage: number;
   diskIO: number;
   responseTime: number;
@@ -110,12 +111,12 @@ const ListHeader = ({
   );
 };
 
-const parseTimeToSeconds = (timeStr: string) => {
-  const hours = timeStr.match(/(\d+)h/)?.[1] || "0";
-  const minutes = timeStr.match(/(\d+)m/)?.[1] || "0";
-  const seconds = timeStr.match(/(\d+)s/)?.[1] || "0";
+const parseTimeToSeconds = (timeStr: string): number => {
+  const hours = parseInt(timeStr.match(/(\d+)h/)?.[1] || "0");
+  const minutes = parseInt(timeStr.match(/(\d+)m/)?.[1] || "0");
+  const seconds = parseInt(timeStr.match(/(\d+)s/)?.[1] || "0");
 
-  return parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(seconds);
+  return hours * 3600 + minutes * 60 + seconds;
 };
 
 const InstanceGrid = ({
@@ -153,13 +154,18 @@ const InstanceGrid = ({
     }
   };
 
-  const compareValues = (a: Instance, b: Instance, field: string) => {
+  const compareValues = (
+    a: Instance,
+    b: Instance,
+    field: keyof Instance,
+  ): number => {
     if (field === "totalTime") {
       return parseTimeToSeconds(a[field]) - parseTimeToSeconds(b[field]);
     }
-    return (
-      (a[field as keyof Instance] || 0) - (b[field as keyof Instance] || 0)
-    );
+    if (typeof a[field] === "number" && typeof b[field] === "number") {
+      return (a[field] as number) - (b[field] as number);
+    }
+    return 0;
   };
 
   const sortInstances = (instances: Instance[]) => {
@@ -170,32 +176,20 @@ const InstanceGrid = ({
           comparison = a.name.localeCompare(b.name);
           break;
         case "severity":
-          const severityOrder = {
-            healthy: 0,
-            warning: 1,
-            critical: 2,
-            offline: 3,
-          };
-          comparison =
-            severityOrder[a.status as keyof typeof severityOrder] -
-            severityOrder[b.status as keyof typeof severityOrder];
-          break;
         case "status":
-          const healthOrder = {
+          const severityOrder: Record<InstanceStatus, number> = {
             healthy: 0,
             warning: 1,
             critical: 2,
             offline: 3,
           };
-          comparison =
-            healthOrder[a.status as keyof typeof healthOrder] -
-            healthOrder[b.status as keyof typeof healthOrder];
+          comparison = severityOrder[a.status] - severityOrder[b.status];
           break;
         case "dbType":
           comparison = a.dbType.localeCompare(b.dbType);
           break;
         default:
-          comparison = compareValues(a, b, sortBy);
+          comparison = compareValues(a, b, sortBy as keyof Instance);
       }
       return sortOrder === "asc" ? comparison : -comparison;
     });
