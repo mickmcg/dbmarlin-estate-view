@@ -1,4 +1,5 @@
 import React from "react";
+import type { Instance } from "./InstanceGrid";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -35,21 +36,6 @@ interface Recommendation {
   description: string;
   impact: "low" | "medium" | "high";
   category: "performance" | "security" | "reliability";
-}
-
-interface Instance {
-  name: string;
-  dbType: string;
-  tags: Record<string, string>;
-  cpuUsage: number;
-  diskIO: number;
-  responseTime: number;
-  totalTime: string;
-  status: string;
-}
-
-interface InstanceDetailsProps {
-  instance: Instance;
 }
 
 const mockEvents: Event[] = [
@@ -216,7 +202,7 @@ const RecommendationRow = ({
   </Card>
 );
 
-const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
+const InstanceDetails = ({ instance }: { instance: Instance }) => {
   const cpuData = React.useMemo(
     () => generateMockTimeData(instance.cpuUsage),
     [instance.cpuUsage],
