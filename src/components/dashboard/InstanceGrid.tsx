@@ -1,5 +1,7 @@
 import React from "react";
 import InstanceTile from "./InstanceTile";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 type ViewLayout = "compact" | "comfortable" | "list";
 type GroupBy = "none" | "server" | "health" | "dbType" | string;
@@ -11,7 +13,8 @@ type SortBy =
   | "events"
   | "totalTime"
   | "executions"
-  | "responseTime";
+  | "responseTime"
+  | "alerts";
 type SortOrder = "asc" | "desc";
 
 interface InstanceGridProps {
@@ -25,6 +28,70 @@ interface InstanceGridProps {
 }
 
 const defaultInstances: any[] = [];
+
+const ListHeader = ({
+  sortBy,
+  onSortChange,
+}: {
+  sortBy: SortBy;
+  onSortChange?: (field: string) => void;
+}) => {
+  const SortButton = ({
+    field,
+    label,
+    width,
+  }: {
+    field: SortBy;
+    label: string;
+    width: string;
+  }) => (
+    <Button
+      variant="ghost"
+      className={`h-8 px-2 justify-start font-medium ${width} hover:bg-transparent hover:text-primary`}
+      onClick={() => onSortChange?.(field)}
+    >
+      {label}
+      {sortBy === field && <ArrowUpDown className="ml-1 h-3 w-3" />}
+    </Button>
+  );
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 border-b bg-muted/50 text-sm sticky top-0">
+      <SortButton field="name" label="Name" width="w-[250px]" />
+      <SortButton field="alerts" label="Alerts" width="w-[100px] text-center" />
+      <SortButton
+        field="changes"
+        label="Changes"
+        width="w-[100px] text-center"
+      />
+      <SortButton field="events" label="Events" width="w-[100px] text-center" />
+      <SortButton
+        field="totalTime"
+        label="Total Time"
+        width="w-[150px] text-center"
+      />
+      <SortButton
+        field="executions"
+        label="Executions"
+        width="w-[150px] text-center"
+      />
+      <SortButton
+        field="responseTime"
+        label="Response"
+        width="w-[150px] text-center"
+      />
+      <SortButton field="severity" label="CPU" width="w-[80px] text-center" />
+    </div>
+  );
+};
+
+const parseTimeToSeconds = (timeStr: string) => {
+  const hours = timeStr.match(/(\d+)h/)?.[1] || "0";
+  const minutes = timeStr.match(/(\d+)m/)?.[1] || "0";
+  const seconds = timeStr.match(/(\d+)s/)?.[1] || "0";
+
+  return parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(seconds);
+};
 
 const InstanceGrid = ({
   instances = defaultInstances,
@@ -61,6 +128,13 @@ const InstanceGrid = ({
     }
   };
 
+  const compareValues = (a: any, b: any, field: string) => {
+    if (field === "totalTime") {
+      return parseTimeToSeconds(a[field]) - parseTimeToSeconds(b[field]);
+    }
+    return (a[field] || 0) - (b[field] || 0);
+  };
+
   const sortInstances = (instances: any[]) => {
     return [...instances].sort((a, b) => {
       let comparison = 0;
@@ -83,7 +157,7 @@ const InstanceGrid = ({
           comparison = a.dbType.localeCompare(b.dbType);
           break;
         default:
-          comparison = (a[sortBy] || 0) - (b[sortBy] || 0);
+          comparison = compareValues(a, b, sortBy);
       }
       return sortOrder === "asc" ? comparison : -comparison;
     });
@@ -128,9 +202,12 @@ const InstanceGrid = ({
   return (
     <div className="p-6 overflow-auto">
       {Object.entries(groupedInstances).map(([group, instances]) => (
-        <div key={group} className="space-y-6 mb-8">
+        <div key={group} className="space-y-1 mb-8">
           {group !== "Instances" && (
-            <h2 className="text-lg font-semibold capitalize">{group}</h2>
+            <h2 className="text-lg font-semibold capitalize mb-4">{group}</h2>
+          )}
+          {layout === "list" && (
+            <ListHeader sortBy={sortBy} onSortChange={onSortChange} />
           )}
           <div className={getGridLayout()}>
             {instances.map((instance) => (
