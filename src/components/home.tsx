@@ -26,6 +26,10 @@ interface TagFilter {
   value: string;
 }
 
+const getRandomElement = <T extends unknown>(array: T[]): T => {
+  return array[Math.floor(Math.random() * array.length)];
+};
+
 const formatTotalTime = (seconds: number): string => {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -97,7 +101,12 @@ const customers = [
   "test1",
   "bak1",
 ];
-const statuses: InstanceStatus[] = ["healthy", "warning", "critical", "offline"];
+const statuses: InstanceStatus[] = [
+  "healthy",
+  "warning",
+  "critical",
+  "offline",
+];
 
 const generateRandomInstance = (id: number): Instance => ({
   id: `db${id + 9}`,
@@ -295,10 +304,6 @@ const defaultInstances: Instance[] = [
   ...Array.from({ length: 20 }, (_, i) => generateRandomInstance(i)),
 ];
 
-const getRandomElement = <T>(array: T[]): T => {
-  return array[Math.floor(Math.random() * array.length)];
-};
-
 const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
@@ -306,7 +311,9 @@ const Home = () => {
   const [dbTypeFilter, setDbTypeFilter] = useState("all");
   const { preferences, updatePreference } = useViewPreferences();
   const [tagFilters, setTagFilters] = useState<TagFilter[]>([]);
-  const [selectedInstance, setSelectedInstance] = useState<Instance | null>(null);
+  const [selectedInstance, setSelectedInstance] = useState<Instance | null>(
+    null,
+  );
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   // Initialize from URL params
