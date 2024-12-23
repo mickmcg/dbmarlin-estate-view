@@ -37,8 +37,19 @@ interface Recommendation {
   category: "performance" | "security" | "reliability";
 }
 
+interface Instance {
+  name: string;
+  dbType: string;
+  tags: Record<string, string>;
+  cpuUsage: number;
+  diskIO: number;
+  responseTime: number;
+  totalTime: string;
+  status: string;
+}
+
 interface InstanceDetailsProps {
-  instance: any;
+  instance: Instance;
 }
 
 const mockEvents: Event[] = [

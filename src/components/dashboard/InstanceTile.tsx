@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/hover-card";
 
 type InstanceStatus = "healthy" | "warning" | "critical" | "offline";
-type TileSize = "small" | "medium" | "large";
+type TileSize = "small" | "medium" | "large" | "hover";
 
 interface InstanceTileProps {
   name: string;
@@ -85,7 +85,10 @@ const TileContent = ({
   statusColors,
   size,
   onNameClick,
-}: InstanceTileProps & { statusColors: ReturnType<typeof getStatusColor> }) => (
+}: InstanceTileProps & {
+  statusColors: ReturnType<typeof getStatusColor>;
+  size: TileSize;
+}) => (
   <div className={`${size === "small" ? "p-2" : "p-3"}`}>
     <div className="space-y-0.5">
       <Button
@@ -241,7 +244,7 @@ const InstanceTile = (props: InstanceTileProps) => {
         </div>
       )}
 
-      <TileContent {...props} statusColors={statusColors} />
+      <TileContent {...props} statusColors={statusColors} size={size} />
     </Card>
   );
 
@@ -250,11 +253,7 @@ const InstanceTile = (props: InstanceTileProps) => {
       <HoverCard>
         <HoverCardTrigger asChild>{card}</HoverCardTrigger>
         <HoverCardContent className="w-[300px] p-0" align="start" side="right">
-          <Card
-            className={`overflow-hidden ${statusColors.border} ${statusColors.bg}`}
-          >
-            <TileContent {...props} size="hover" statusColors={statusColors} />
-          </Card>
+          <TileContent {...props} statusColors={statusColors} size="hover" />
         </HoverCardContent>
       </HoverCard>
     );

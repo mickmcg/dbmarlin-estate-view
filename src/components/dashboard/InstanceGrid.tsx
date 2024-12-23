@@ -19,17 +19,33 @@ type SortBy =
   | "diskIO";
 type SortOrder = "asc" | "desc";
 
+interface Instance {
+  id: string;
+  name: string;
+  status: string;
+  cpuUsage: number;
+  diskIO: number;
+  responseTime: number;
+  alerts: number;
+  changes: number;
+  events: number;
+  executions: number;
+  totalTime: string;
+  dbType: string;
+  tags: Record<string, string>;
+}
+
 interface InstanceGridProps {
-  instances?: any[];
+  instances?: Instance[];
   layout?: ViewLayout;
   groupBy?: GroupBy;
   sortBy?: SortBy;
   sortOrder?: SortOrder;
-  onInstanceClick?: (instance: any) => void;
+  onInstanceClick?: (instance: Instance) => void;
   onSortChange?: (field: string) => void;
 }
 
-const defaultInstances: any[] = [];
+const defaultInstances: Instance[] = [];
 
 const ListHeader = ({
   sortBy,
@@ -137,14 +153,16 @@ const InstanceGrid = ({
     }
   };
 
-  const compareValues = (a: any, b: any, field: string) => {
+  const compareValues = (a: Instance, b: Instance, field: string) => {
     if (field === "totalTime") {
       return parseTimeToSeconds(a[field]) - parseTimeToSeconds(b[field]);
     }
-    return (a[field] || 0) - (b[field] || 0);
+    return (
+      (a[field as keyof Instance] || 0) - (b[field as keyof Instance] || 0)
+    );
   };
 
-  const sortInstances = (instances: any[]) => {
+  const sortInstances = (instances: Instance[]) => {
     return [...instances].sort((a, b) => {
       let comparison = 0;
       switch (sortBy) {
@@ -183,10 +201,10 @@ const InstanceGrid = ({
     });
   };
 
-  const groupInstances = (instances: any[]) => {
+  const groupInstances = (instances: Instance[]) => {
     if (groupBy === "none") return { Instances: instances };
 
-    return instances.reduce((groups: Record<string, any[]>, instance) => {
+    return instances.reduce((groups: Record<string, Instance[]>, instance) => {
       let groupKey = "";
 
       switch (groupBy) {

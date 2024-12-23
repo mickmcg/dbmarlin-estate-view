@@ -26,6 +26,7 @@ interface DashboardHeaderProps {
   onStatusFilter?: (status: string) => void;
   onDbTypeFilter?: (type: string) => void;
   onTagFiltersChange?: (filters: TagFilter[]) => void;
+  filteredCount?: number;
   tagFilters?: TagFilter[];
   instances?: Array<{
     tags: {
@@ -34,7 +35,6 @@ interface DashboardHeaderProps {
       dc: string;
       customer: string;
     };
-    filteredCount?: number;
   }>;
 }
 
@@ -83,10 +83,12 @@ const DashboardHeader = ({
 
   return (
     <div className="w-full h-20 px-6 bg-background border-b flex items-center gap-4">
-      {/* Search Bar */}
-      <div className="text-sm font-medium">
+      {/* Instance Count */}
+      <div className="text-sm text-muted-foreground">
         {filteredCount}/{instances.length} instances
       </div>
+
+      {/* Search Bar */}
       <div className="relative flex-1 max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
