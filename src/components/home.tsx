@@ -378,6 +378,7 @@ const Home = () => {
         onDbTypeFilter={setDbTypeFilter}
         onTagFiltersChange={setTagFilters}
         instances={defaultInstances}
+        filteredCount={filteredInstances.length}
         tagFilters={tagFilters}
       />
       <ViewControls

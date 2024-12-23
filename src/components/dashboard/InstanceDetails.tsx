@@ -10,8 +10,16 @@ import {
   AlertTriangle,
   Database,
   Code,
-  FileText,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 interface Event {
   id: string;
@@ -72,21 +80,76 @@ const mockRecommendations: Recommendation[] = [
   },
 ];
 
+const generateMockTimeData = (value: number, variance: number = 20) => {
+  const now = new Date();
+  return Array.from({ length: 24 }, (_, i) => {
+    const time = new Date(now.getTime() - (23 - i) * 3600000);
+    const baseValue = value + Math.sin(i / 4) * (variance / 2);
+    return {
+      time: time.toLocaleTimeString([], { hour: "2-digit", hour12: false }),
+      value: Math.max(
+        0,
+        Math.min(100, baseValue + (Math.random() - 0.5) * variance),
+      ),
+    };
+  });
+};
+
 const MetricChart = ({
   title,
   metric,
   color,
+  icon: Icon,
+  unit = "%",
+  data,
 }: {
   title: string;
-  metric: number;
+  metric: number | string;
   color: string;
+  icon: React.ElementType;
+  unit?: string;
+  data?: Array<{ time: string; value: number }>;
 }) => (
   <Card className="p-4 space-y-2">
-    <h3 className="text-sm font-medium">{title}</h3>
-    <div className="h-[200px] bg-muted rounded-md" />
+    <div className="flex items-center gap-2">
+      <Icon className="h-4 w-4" />
+      <h3 className="text-sm font-medium">{title}</h3>
+    </div>
+    <div className="h-[200px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart
+          data={data}
+          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis
+            dataKey="time"
+            fontSize={10}
+            tickFormatter={(value) => value.split(":")[0]}
+          />
+          <YAxis fontSize={10} />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "var(--background)",
+              border: "1px solid var(--border)",
+            }}
+            labelStyle={{ color: "var(--foreground)" }}
+          />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke={color}
+            strokeWidth={2}
+            dot={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
     <div className="flex items-center justify-between">
-      <span className="text-2xl font-bold">{metric}%</span>
-      <span className={`text-sm ${color}`}>+2.5%</span>
+      <span className="text-2xl font-bold flex items-center gap-2">
+        {typeof metric === "number" ? `${metric}${unit}` : metric}
+      </span>
+      <span className={color}>+2.5%</span>
     </div>
   </Card>
 );
@@ -143,6 +206,19 @@ const RecommendationRow = ({
 );
 
 const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
+  const cpuData = React.useMemo(
+    () => generateMockTimeData(instance.cpuUsage),
+    [instance.cpuUsage],
+  );
+  const diskIOData = React.useMemo(
+    () => generateMockTimeData(instance.diskIO),
+    [instance.diskIO],
+  );
+  const responseTimeData = React.useMemo(
+    () => generateMockTimeData(instance.responseTime, 100),
+    [instance.responseTime],
+  );
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -176,18 +252,35 @@ const InstanceDetails = ({ instance }: InstanceDetailsProps) => {
               <MetricChart
                 title="CPU Usage"
                 metric={instance.cpuUsage}
-                color="text-green-500"
+                color="var(--primary)"
+                icon={Activity}
+                data={cpuData}
               />
               <MetricChart
                 title="Disk I/O"
                 metric={instance.diskIO}
-                color="text-blue-500"
+                color="var(--primary)"
+                icon={HardDrive}
+                data={diskIOData}
               />
             </div>
-            <Card className="p-4">
-              <h3 className="text-sm font-medium mb-2">Response Time</h3>
-              <div className="h-[300px] bg-muted rounded-md" />
-            </Card>
+            <div className="grid grid-cols-2 gap-4">
+              <MetricChart
+                title="Response Time"
+                metric={instance.responseTime}
+                color="var(--primary)"
+                icon={Activity}
+                unit="ms"
+                data={responseTimeData}
+              />
+              <MetricChart
+                title="Total Time"
+                metric={instance.totalTime}
+                color="var(--primary)"
+                icon={Clock}
+                unit=""
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4">

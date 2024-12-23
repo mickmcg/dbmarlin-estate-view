@@ -34,6 +34,7 @@ interface DashboardHeaderProps {
       dc: string;
       customer: string;
     };
+    filteredCount?: number;
   }>;
 }
 
@@ -44,6 +45,7 @@ const DashboardHeader = ({
   onTagFiltersChange = () => {},
   tagFilters = [],
   instances = [],
+  filteredCount = 0,
 }: DashboardHeaderProps) => {
   const tagOptions = useMemo(() => {
     const options: Record<string, Set<string>> = {
@@ -82,6 +84,9 @@ const DashboardHeader = ({
   return (
     <div className="w-full h-20 px-6 bg-background border-b flex items-center gap-4">
       {/* Search Bar */}
+      <div className="text-sm font-medium">
+        {filteredCount}/{instances.length} instances
+      </div>
       <div className="relative flex-1 max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input

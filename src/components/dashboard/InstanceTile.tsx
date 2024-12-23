@@ -2,7 +2,13 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, AlertTriangle, Activity } from "lucide-react";
+import {
+  MoreHorizontal,
+  AlertTriangle,
+  Activity,
+  HardDrive,
+  Clock,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +81,7 @@ const TileContent = ({
   responseTime,
   alerts,
   dbType,
+  totalTime,
   statusColors,
   size,
   onNameClick,
@@ -117,9 +124,18 @@ const TileContent = ({
           </div>
         </div>
 
-        <div className="space-y-1">
-          <div className="text-xs font-medium">Response Time</div>
-          <div className="text-lg font-bold">{responseTime}ms</div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <div className="text-xs font-medium">Response Time</div>
+            <div className="text-lg font-bold">{responseTime}ms</div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-xs font-medium">Total Time</div>
+            <div className="text-lg font-bold flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              {totalTime}
+            </div>
+          </div>
         </div>
       </div>
     )}
@@ -143,6 +159,7 @@ const InstanceTile = (props: InstanceTileProps) => {
     totalTime,
     executions,
     cpuUsage,
+    diskIO,
   } = props;
   const statusColors = getStatusColor(status);
 
@@ -186,6 +203,12 @@ const InstanceTile = (props: InstanceTileProps) => {
           <div className="flex items-center justify-center gap-1">
             <Activity className="h-3 w-3" />
             <span>{cpuUsage}%</span>
+          </div>
+        </div>
+        <div className="w-[80px] text-center">
+          <div className="flex items-center justify-center gap-1">
+            <HardDrive className="h-3 w-3" />
+            <span>{diskIO}%</span>
           </div>
         </div>
       </div>

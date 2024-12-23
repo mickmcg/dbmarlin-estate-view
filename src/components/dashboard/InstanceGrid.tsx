@@ -15,7 +15,8 @@ type SortBy =
   | "executions"
   | "responseTime"
   | "alerts"
-  | "status";
+  | "status"
+  | "diskIO";
 type SortOrder = "asc" | "desc";
 
 interface InstanceGridProps {
@@ -84,6 +85,11 @@ const ListHeader = ({
         width="w-[100px] text-center"
       />
       <SortButton field="severity" label="CPU" width="w-[80px] text-center" />
+      <SortButton
+        field="diskIO"
+        label="Disk I/O"
+        width="w-[80px] text-center"
+      />
     </div>
   );
 };
