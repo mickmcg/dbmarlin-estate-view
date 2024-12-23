@@ -149,33 +149,25 @@ const InstanceTile = (props: InstanceTileProps) => {
   if (size === "large") {
     return (
       <div
-        className={`flex items-center gap-2 px-3 py-1.5 ${statusColors.bg} hover:bg-accent/50 cursor-pointer text-sm`}
+        className={`flex items-center h-12 ${statusColors.bg} hover:bg-accent/50 cursor-pointer text-sm`}
         onClick={onViewDetails}
       >
-        <div className="w-[250px] truncate">
-          <Button
-            variant="link"
-            className="p-0 h-auto font-medium hover:no-underline text-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              props.onNameClick?.();
-            }}
-          >
-            {props.name}
-          </Button>
-          <div className="flex items-center gap-1 mt-0.5">
-            <Badge
-              variant="outline"
-              className={`${statusColors.text} capitalize text-xs px-1.5 py-0`}
-            >
-              {status}
-            </Badge>
-            <Badge variant="outline" className="text-xs px-1.5 py-0">
-              {props.dbType}
-            </Badge>
-          </div>
+        <div className="w-[180px] truncate pl-3">
+          <span className="font-medium">{props.name}</span>
         </div>
-        <div className="w-[100px] text-center">
+        <Badge
+          variant="outline"
+          className={`${statusColors.text} capitalize text-xs px-1.5 py-0 w-[100px] text-center`}
+        >
+          {status}
+        </Badge>
+        <Badge
+          variant="outline"
+          className="text-xs px-1.5 py-0 w-[100px] text-center"
+        >
+          {props.dbType}
+        </Badge>
+        <div className="w-[80px] text-center">
           {props.alerts > 0 && (
             <div className="flex items-center justify-center gap-1 text-red-500">
               <AlertTriangle className="h-3 w-3" />
@@ -183,13 +175,13 @@ const InstanceTile = (props: InstanceTileProps) => {
             </div>
           )}
         </div>
-        <div className="w-[100px] text-center">{changes}</div>
-        <div className="w-[100px] text-center">{events}</div>
-        <div className="w-[150px] text-center">{totalTime}</div>
-        <div className="w-[150px] text-center">
+        <div className="w-[80px] text-center">{changes}</div>
+        <div className="w-[80px] text-center">{events}</div>
+        <div className="w-[120px] text-center">{totalTime}</div>
+        <div className="w-[120px] text-center">
           {executions.toLocaleString()}
         </div>
-        <div className="w-[150px] text-center">{props.responseTime}ms</div>
+        <div className="w-[100px] text-center">{props.responseTime}ms</div>
         <div className="w-[80px] text-center">
           <div className="flex items-center justify-center gap-1">
             <Activity className="h-3 w-3" />

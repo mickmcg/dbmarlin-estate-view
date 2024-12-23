@@ -14,7 +14,8 @@ type SortBy =
   | "totalTime"
   | "executions"
   | "responseTime"
-  | "alerts";
+  | "alerts"
+  | "status";
 type SortOrder = "asc" | "desc";
 
 interface InstanceGridProps {
@@ -56,29 +57,31 @@ const ListHeader = ({
   );
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 border-b bg-muted/50 text-sm sticky top-0">
-      <SortButton field="name" label="Name" width="w-[250px]" />
-      <SortButton field="alerts" label="Alerts" width="w-[100px] text-center" />
+    <div className="flex items-center px-3 border-b bg-muted/50 text-sm sticky top-0">
+      <SortButton field="name" label="Name" width="w-[180px]" />
+      <SortButton field="status" label="Health" width="w-[100px]" />
+      <SortButton field="dbType" label="Type" width="w-[100px]" />
+      <SortButton field="alerts" label="Alerts" width="w-[80px] text-center" />
       <SortButton
         field="changes"
         label="Changes"
-        width="w-[100px] text-center"
+        width="w-[80px] text-center"
       />
-      <SortButton field="events" label="Events" width="w-[100px] text-center" />
+      <SortButton field="events" label="Events" width="w-[80px] text-center" />
       <SortButton
         field="totalTime"
         label="Total Time"
-        width="w-[150px] text-center"
+        width="w-[120px] text-center"
       />
       <SortButton
         field="executions"
         label="Executions"
-        width="w-[150px] text-center"
+        width="w-[120px] text-center"
       />
       <SortButton
         field="responseTime"
         label="Response"
-        width="w-[150px] text-center"
+        width="w-[100px] text-center"
       />
       <SortButton field="severity" label="CPU" width="w-[80px] text-center" />
     </div>
@@ -152,6 +155,17 @@ const InstanceGrid = ({
           comparison =
             severityOrder[a.status as keyof typeof severityOrder] -
             severityOrder[b.status as keyof typeof severityOrder];
+          break;
+        case "status":
+          const healthOrder = {
+            healthy: 0,
+            warning: 1,
+            critical: 2,
+            offline: 3,
+          };
+          comparison =
+            healthOrder[a.status as keyof typeof healthOrder] -
+            healthOrder[b.status as keyof typeof healthOrder];
           break;
         case "dbType":
           comparison = a.dbType.localeCompare(b.dbType);
