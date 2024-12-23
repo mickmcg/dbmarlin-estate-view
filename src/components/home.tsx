@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import type { Instance, InstanceStatus } from "./dashboard/InstanceGrid";
 import DashboardHeader from "./dashboard/DashboardHeader";
 import ViewControls from "./dashboard/ViewControls";
 import InstanceGrid from "./dashboard/InstanceGrid";
@@ -96,15 +97,22 @@ const customers = [
   "test1",
   "bak1",
 ];
-const statuses = ["healthy", "warning", "critical", "offline"];
+const statuses: InstanceStatus[] = ["healthy", "warning", "critical", "offline"];
 
-const getRandomElement = <T extends any>(array: T[]): T => {
-  return array[Math.floor(Math.random() * array.length)];
-};
-
-const generateRandomInstance = (id: number) => ({
+const generateRandomInstance = (id: number): Instance => ({
   id: `db${id + 9}`,
-  name: `${getRandomElement(["Analytics", "Reporting", "Backup", "Archive", "Testing", "Production", "Development", "Staging", "Integration", "Legacy"])} DB ${id + 9}`,
+  name: `${getRandomElement([
+    "Analytics",
+    "Reporting",
+    "Backup",
+    "Archive",
+    "Testing",
+    "Production",
+    "Development",
+    "Staging",
+    "Integration",
+    "Legacy",
+  ])} DB ${id + 9}`,
   status: getRandomElement(statuses),
   cpuUsage: getRandomInt(0, 100),
   diskIO: getRandomInt(0, 100),
@@ -123,7 +131,7 @@ const generateRandomInstance = (id: number) => ({
   },
 });
 
-const defaultInstances = [
+const defaultInstances: Instance[] = [
   {
     id: "db1",
     name: "Production DB",
@@ -287,6 +295,10 @@ const defaultInstances = [
   ...Array.from({ length: 20 }, (_, i) => generateRandomInstance(i)),
 ];
 
+const getRandomElement = <T>(array: T[]): T => {
+  return array[Math.floor(Math.random() * array.length)];
+};
+
 const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
@@ -294,7 +306,7 @@ const Home = () => {
   const [dbTypeFilter, setDbTypeFilter] = useState("all");
   const { preferences, updatePreference } = useViewPreferences();
   const [tagFilters, setTagFilters] = useState<TagFilter[]>([]);
-  const [selectedInstance, setSelectedInstance] = useState<any>(null);
+  const [selectedInstance, setSelectedInstance] = useState<Instance | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   // Initialize from URL params
@@ -353,7 +365,7 @@ const Home = () => {
     return matchesSearch && matchesStatus && matchesDbType && matchesTags;
   });
 
-  const handleInstanceClick = (instance: any) => {
+  const handleInstanceClick = (instance: Instance) => {
     setSelectedInstance(instance);
     setIsDetailsOpen(true);
   };

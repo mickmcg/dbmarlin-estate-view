@@ -20,6 +20,13 @@ type SortBy =
 type SortOrder = "asc" | "desc";
 type InstanceStatus = "healthy" | "warning" | "critical" | "offline";
 
+interface InstanceTags {
+  env: string;
+  app: string;
+  dc: string;
+  customer: string;
+}
+
 interface Instance {
   id: string;
   name: string;
@@ -33,7 +40,7 @@ interface Instance {
   executions: number;
   totalTime: string;
   dbType: string;
-  tags: Record<string, string>;
+  tags: InstanceTags;
 }
 
 interface InstanceGridProps {
@@ -213,7 +220,7 @@ const InstanceGrid = ({
           break;
         default:
           if (groupBy.startsWith("tag:")) {
-            const tagKey = groupBy.split(":")[1];
+            const tagKey = groupBy.split(":")[1] as keyof InstanceTags;
             groupKey = instance.tags[tagKey] || "Other";
           }
       }
@@ -258,3 +265,4 @@ const InstanceGrid = ({
 };
 
 export default InstanceGrid;
+export type { Instance, InstanceStatus, InstanceTags };
