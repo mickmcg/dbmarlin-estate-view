@@ -1,5 +1,5 @@
 import React from "react";
-import type { Instance, InstanceStatus } from "./InstanceGrid";
+import type { Instance, InstanceStatus, SortBy } from "./InstanceGrid";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,9 +29,9 @@ import {
 interface GroupDetailsProps {
   groupName: string;
   instances: Instance[];
-  sortBy?: string;
+  sortBy?: SortBy;
   sortOrder?: "asc" | "desc";
-  onSortChange?: (field: string) => void;
+  onSortChange?: (field: SortBy) => void;
   onClose?: () => void;
 }
 
@@ -39,15 +39,15 @@ const ListHeader = ({
   sortBy,
   onSortChange,
 }: {
-  sortBy: string;
-  onSortChange?: (field: string) => void;
+  sortBy: SortBy;
+  onSortChange?: (field: SortBy) => void;
 }) => {
   const SortButton = ({
     field,
     label,
     className,
   }: {
-    field: string;
+    field: SortBy;
     label: string;
     className?: string;
   }) => (
@@ -158,7 +158,7 @@ const parseTimeToSeconds = (timeStr: string): number => {
 
 const sortInstances = (
   instances: Instance[],
-  sortBy: string,
+  sortBy: SortBy,
   sortOrder: "asc" | "desc",
 ) => {
   const compareValues = (
@@ -438,9 +438,9 @@ const GroupDetails = ({
                         <Badge
                           variant={
                             instance.status === "healthy"
-                              ? "success"
+                              ? "default"
                               : instance.status === "warning"
-                                ? "warning"
+                                ? "secondary"
                                 : instance.status === "critical"
                                   ? "destructive"
                                   : "outline"

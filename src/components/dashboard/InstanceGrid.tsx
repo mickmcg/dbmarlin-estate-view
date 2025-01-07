@@ -5,8 +5,9 @@ import { ArrowUpDown } from "lucide-react";
 
 type ViewLayout = "compact" | "comfortable" | "list";
 type GroupBy = "none" | "server" | "health" | "dbType" | string;
-type SortBy =
+export type SortBy =
   | "name"
+  | "cpuUsage"
   | "severity"
   | "dbType"
   | "changes"

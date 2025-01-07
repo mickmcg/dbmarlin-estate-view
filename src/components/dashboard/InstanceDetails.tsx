@@ -62,9 +62,9 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
                 <Badge
                   variant={
                     instance.status === "healthy"
-                      ? "success"
+                      ? "default"
                       : instance.status === "warning"
-                        ? "warning"
+                        ? "secondary"
                         : instance.status === "critical"
                           ? "destructive"
                           : "outline"
@@ -198,7 +198,7 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
                         <Line
                           type="monotone"
                           dataKey="value"
-                          stroke="#2563eb"
+                          stroke="#16a34a"
                           name="CPU Usage"
                         />
                       </LineChart>
@@ -221,7 +221,7 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
                         <Line
                           type="monotone"
                           dataKey="value"
-                          stroke="#16a34a"
+                          stroke="#0891b2"
                           name="Disk I/O"
                         />
                       </LineChart>
@@ -230,76 +230,100 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
                 </Card>
               </div>
 
-              {/* Metrics Table */}
-              <Card className="p-4">
-                <h3 className="text-lg font-semibold mb-4">Instance Metrics</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2">Metric</th>
-                        <th className="text-left py-2">Value</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-b">
-                        <td className="py-2">CPU Usage</td>
-                        <td className="py-2">{instance.cpuUsage}%</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="py-2">Disk I/O</td>
-                        <td className="py-2">{instance.diskIO}%</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="py-2">Response Time</td>
-                        <td className="py-2">{instance.responseTime}ms</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="py-2">Total Time</td>
-                        <td className="py-2">{instance.totalTime}</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="py-2">Alerts</td>
-                        <td className="py-2">{instance.alerts}</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="py-2">Events</td>
-                        <td className="py-2">{instance.events}</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="py-2">Changes</td>
-                        <td className="py-2">{instance.changes}</td>
-                      </tr>
-                      <tr className="border-b last:border-0">
-                        <td className="py-2">Executions</td>
-                        <td className="py-2">{instance.executions}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
+              {/* Events and Alerts */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="p-4">
+                  <h3 className="text-lg font-semibold mb-4">Recent Events</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <div className="text-sm font-medium">Schema Change</div>
+                        <div className="text-xs text-muted-foreground">
+                          2 minutes ago
+                        </div>
+                      </div>
+                      <Badge variant="secondary">DDL</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <div className="text-sm font-medium">
+                          Performance Alert
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          15 minutes ago
+                        </div>
+                      </div>
+                      <Badge variant="destructive">Critical</Badge>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-4">
+                  <h3 className="text-lg font-semibold mb-4">
+                    Active Alerts ({instance.alerts})
+                  </h3>
+                  <div className="space-y-4">
+                    {instance.alerts > 0 && (
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <div className="text-sm font-medium">
+                            High CPU Usage
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            CPU usage above 80% for 5 minutes
+                          </div>
+                        </div>
+                        <Badge variant="destructive">Critical</Badge>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </div>
             </div>
           </ScrollArea>
         </TabsContent>
 
         <TabsContent value="events" className="flex-1 mt-0">
           <ScrollArea className="h-[calc(100vh-186px)]">
-            <div className="p-6 space-y-4">
+            <div className="p-6">
               <Card className="p-4">
-                <h3 className="text-lg font-semibold mb-4">Recent Events</h3>
+                <h3 className="text-lg font-semibold mb-4">Event History</h3>
                 <div className="space-y-4">
-                  {Array.from({ length: 5 }).map((_, i) => (
+                  {Array.from({ length: 10 }).map((_, i) => (
                     <div
                       key={i}
                       className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
                     >
                       <div className="space-y-1">
-                        <div className="font-medium">Query Execution</div>
+                        <div className="font-medium">
+                          {
+                            [
+                              "Schema Change",
+                              "Performance Alert",
+                              "Configuration Update",
+                              "Backup Completed",
+                            ][i % 4]
+                          }
+                        </div>
                         <div className="text-sm text-muted-foreground">
-                          {Math.floor(Math.random() * 60)} minutes ago
+                          {i + 1} hour{i !== 0 ? "s" : ""} ago
                         </div>
                       </div>
-                      <Badge variant="outline">Performance</Badge>
+                      <Badge
+                        variant={
+                          i % 3 === 0
+                            ? "destructive"
+                            : i % 3 === 1
+                              ? "secondary"
+                              : "default"
+                        }
+                      >
+                        {i % 3 === 0
+                          ? "Critical"
+                          : i % 3 === 1
+                            ? "Warning"
+                            : "Info"}
+                      </Badge>
                     </div>
                   ))}
                 </div>
@@ -316,21 +340,38 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
                   Performance Recommendations
                 </h3>
                 <div className="space-y-4">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-4 border-b pb-4 last:border-0 last:pb-0"
-                    >
-                      <AlertTriangle className="h-8 w-8 p-2 bg-primary/10 rounded-lg" />
-                      <div className="space-y-1 flex-1">
-                        <div className="font-medium">High CPU Usage</div>
-                        <div className="text-sm text-muted-foreground">
-                          Consider optimizing queries or increasing resources
-                        </div>
+                  <div className="flex items-center gap-4 border-b pb-4">
+                    <Database className="h-8 w-8 p-2 bg-primary/10 rounded-lg" />
+                    <div className="space-y-1 flex-1">
+                      <div className="font-medium">
+                        Optimize Query Performance
                       </div>
-                      <Badge>High Impact</Badge>
+                      <div className="text-sm text-muted-foreground">
+                        Consider adding an index for frequently accessed columns
+                      </div>
                     </div>
-                  ))}
+                    <Badge>High Impact</Badge>
+                  </div>
+                  <div className="flex items-center gap-4 border-b pb-4">
+                    <Activity className="h-8 w-8 p-2 bg-primary/10 rounded-lg" />
+                    <div className="space-y-1 flex-1">
+                      <div className="font-medium">Resource Utilization</div>
+                      <div className="text-sm text-muted-foreground">
+                        CPU usage consistently high, consider scaling resources
+                      </div>
+                    </div>
+                    <Badge>Medium Impact</Badge>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Clock className="h-8 w-8 p-2 bg-primary/10 rounded-lg" />
+                    <div className="space-y-1 flex-1">
+                      <div className="font-medium">Maintenance Window</div>
+                      <div className="text-sm text-muted-foreground">
+                        Schedule regular maintenance during off-peak hours
+                      </div>
+                    </div>
+                    <Badge>Low Impact</Badge>
+                  </div>
                 </div>
               </Card>
             </div>
