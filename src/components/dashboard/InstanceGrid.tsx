@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import InstanceTile from "./InstanceTile";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
@@ -49,6 +49,7 @@ interface InstanceGridProps {
   groupBy?: GroupBy;
   sortBy?: SortBy;
   sortOrder?: SortOrder;
+  onGroupClick?: (groupName: string, instances: Instance[]) => void;
   onInstanceClick?: (instance: Instance) => void;
   onSortChange?: (field: string) => void;
 }
@@ -65,15 +66,15 @@ const ListHeader = ({
   const SortButton = ({
     field,
     label,
-    width,
+    className,
   }: {
     field: SortBy;
     label: string;
-    width: string;
+    className?: string;
   }) => (
     <Button
       variant="ghost"
-      className={`h-8 px-2 justify-start font-medium ${width} hover:bg-transparent hover:text-primary`}
+      className={`h-8 px-2 justify-start font-medium hover:bg-transparent hover:text-primary ${className}`}
       onClick={() => onSortChange?.(field)}
     >
       {label}
@@ -82,38 +83,60 @@ const ListHeader = ({
   );
 
   return (
-    <div className="flex items-center px-3 border-b bg-muted/50 text-sm sticky top-0">
-      <SortButton field="name" label="Name" width="w-[180px]" />
-      <SortButton field="status" label="Health" width="w-[100px]" />
-      <SortButton field="dbType" label="Type" width="w-[100px]" />
-      <SortButton field="alerts" label="Alerts" width="w-[80px] text-center" />
-      <SortButton
-        field="changes"
-        label="Changes"
-        width="w-[80px] text-center"
-      />
-      <SortButton field="events" label="Events" width="w-[80px] text-center" />
-      <SortButton
-        field="totalTime"
-        label="Total Time"
-        width="w-[120px] text-center"
-      />
-      <SortButton
-        field="executions"
-        label="Executions"
-        width="w-[120px] text-center"
-      />
-      <SortButton
-        field="responseTime"
-        label="Response"
-        width="w-[100px] text-center"
-      />
-      <SortButton field="severity" label="CPU" width="w-[80px] text-center" />
-      <SortButton
-        field="diskIO"
-        label="Disk I/O"
-        width="w-[80px] text-center"
-      />
+    <div className="flex items-center h-14 px-3 border-b bg-muted/50 text-sm sticky top-0 w-full">
+      <div className="flex-[2] pl-4">
+        <SortButton field="name" label="Name" />
+      </div>
+      <div className="flex-1">
+        <SortButton field="status" label="Health" />
+      </div>
+      <div className="flex-1">
+        <SortButton field="dbType" label="Type" />
+      </div>
+      <div className="flex-1 text-center">
+        <SortButton field="alerts" label="Alerts" className="justify-center" />
+      </div>
+      <div className="flex-1 text-center">
+        <SortButton
+          field="changes"
+          label="Changes"
+          className="justify-center"
+        />
+      </div>
+      <div className="flex-1 text-center">
+        <SortButton field="events" label="Events" className="justify-center" />
+      </div>
+      <div className="flex-[1.2] text-center">
+        <SortButton
+          field="totalTime"
+          label="Total Time"
+          className="justify-center"
+        />
+      </div>
+      <div className="flex-[1.2] text-center">
+        <SortButton
+          field="executions"
+          label="Executions"
+          className="justify-center"
+        />
+      </div>
+      <div className="flex-1 text-center">
+        <SortButton
+          field="responseTime"
+          label="Response"
+          className="justify-center"
+        />
+      </div>
+      <div className="flex-1 text-center">
+        <SortButton field="severity" label="CPU" className="justify-center" />
+      </div>
+      <div className="flex-1 text-center">
+        <SortButton
+          field="diskIO"
+          label="Disk I/O"
+          className="justify-center"
+        />
+      </div>
     </div>
   );
 };
@@ -132,6 +155,7 @@ const InstanceGrid = ({
   groupBy = "none",
   sortBy = "name",
   sortOrder = "asc",
+  onGroupClick,
   onInstanceClick,
   onSortChange,
 }: InstanceGridProps) => {
@@ -155,7 +179,7 @@ const InstanceGrid = ({
       case "comfortable":
         return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
       case "list":
-        return "space-y-[1px]";
+        return "space-y-[1px] w-full";
       default:
         return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
     }
@@ -239,11 +263,18 @@ const InstanceGrid = ({
   const groupedInstances = groupInstances(sortedInstances);
 
   return (
-    <div className="p-6 overflow-auto">
+    <div className="p-6 overflow-auto min-w-0">
       {Object.entries(groupedInstances).map(([group, instances]) => (
-        <div key={group} className="space-y-1 mb-8">
+        <div key={group} className="space-y-4 mb-8">
           {group !== "Instances" && (
-            <h2 className="text-lg font-semibold capitalize mb-4">{group}</h2>
+            <div
+              className="flex items-center gap-2 cursor-pointer group mb-4"
+              onClick={() => onGroupClick?.(group, instances)}
+            >
+              <h2 className="text-xl font-semibold text-foreground group-hover:text-primary">
+                {group}
+              </h2>
+            </div>
           )}
           {layout === "list" && (
             <ListHeader sortBy={sortBy} onSortChange={onSortChange} />

@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   Activity,
   HardDrive,
-  Clock,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -134,10 +133,7 @@ const TileContent = ({
           </div>
           <div className="space-y-1">
             <div className="text-xs font-medium">Total Time</div>
-            <div className="text-lg font-bold flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {totalTime}
-            </div>
+            <div className="text-lg font-bold">{totalTime}</div>
           </div>
         </div>
       </div>
@@ -163,31 +159,56 @@ const InstanceTile = (props: InstanceTileProps) => {
     executions,
     cpuUsage,
     diskIO,
+    responseTime,
   } = props;
   const statusColors = getStatusColor(status);
+
+  const getRowBackground = () => {
+    switch (status) {
+      case "healthy":
+        return "bg-green-50/50 dark:bg-green-500/5";
+      case "warning":
+        return "bg-yellow-50/50 dark:bg-yellow-500/5";
+      case "critical":
+        return "bg-red-50/50 dark:bg-red-500/5";
+      case "offline":
+        return "bg-gray-50/50 dark:bg-gray-500/5";
+      default:
+        return "";
+    }
+  };
 
   if (size === "large") {
     return (
       <div
-        className={`flex items-center h-12 ${statusColors.bg} hover:bg-accent/50 cursor-pointer text-sm`}
+        className={`flex items-center h-14 ${getRowBackground()} hover:bg-accent/50 cursor-pointer text-sm border-b last:border-b-0 w-full`}
         onClick={onViewDetails}
       >
-        <div className="w-[180px] truncate pl-3">
+        <div className="flex-[2] truncate pl-4">
           <span className="font-medium">{props.name}</span>
         </div>
-        <Badge
-          variant="outline"
-          className={`${statusColors.text} capitalize text-xs px-1.5 py-0 w-[100px] text-center`}
-        >
-          {status}
-        </Badge>
-        <Badge
-          variant="outline"
-          className="text-xs px-1.5 py-0 w-[100px] text-center"
-        >
-          {props.dbType}
-        </Badge>
-        <div className="w-[80px] text-center">
+        <div className="flex-1">
+          <Badge
+            variant={
+              status === "healthy"
+                ? "success"
+                : status === "warning"
+                  ? "warning"
+                  : status === "critical"
+                    ? "destructive"
+                    : "outline"
+            }
+            className="capitalize text-xs px-1.5 py-0"
+          >
+            {status}
+          </Badge>
+        </div>
+        <div className="flex-1">
+          <Badge variant="outline" className="text-xs px-1.5 py-0">
+            {props.dbType}
+          </Badge>
+        </div>
+        <div className="flex-1 text-center">
           {props.alerts > 0 && (
             <div className="flex items-center justify-center gap-1 text-red-500">
               <AlertTriangle className="h-3 w-3" />
@@ -195,20 +216,20 @@ const InstanceTile = (props: InstanceTileProps) => {
             </div>
           )}
         </div>
-        <div className="w-[80px] text-center">{changes}</div>
-        <div className="w-[80px] text-center">{events}</div>
-        <div className="w-[120px] text-center">{totalTime}</div>
-        <div className="w-[120px] text-center">
+        <div className="flex-1 text-center">{changes}</div>
+        <div className="flex-1 text-center">{events}</div>
+        <div className="flex-[1.2] text-center">{totalTime}</div>
+        <div className="flex-[1.2] text-center">
           {executions.toLocaleString()}
         </div>
-        <div className="w-[100px] text-center">{props.responseTime}ms</div>
-        <div className="w-[80px] text-center">
+        <div className="flex-1 text-center">{responseTime}ms</div>
+        <div className="flex-1 text-center">
           <div className="flex items-center justify-center gap-1">
             <Activity className="h-3 w-3" />
             <span>{cpuUsage}%</span>
           </div>
         </div>
-        <div className="w-[80px] text-center">
+        <div className="flex-1 text-center">
           <div className="flex items-center justify-center gap-1">
             <HardDrive className="h-3 w-3" />
             <span>{diskIO}%</span>
