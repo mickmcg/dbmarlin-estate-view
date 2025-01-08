@@ -1,21 +1,9 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import type { SortBy } from "@/components/dashboard/InstanceGrid";
 
 type ViewLayout = "compact" | "comfortable" | "list";
 type GroupBy = "none" | "server" | "health" | "dbType" | string;
-type SortBy =
-  | "name"
-  | "cpuUsage"
-  | "severity"
-  | "dbType"
-  | "changes"
-  | "events"
-  | "totalTime"
-  | "executions"
-  | "responseTime"
-  | "alerts"
-  | "status"
-  | "diskIO";
 type SortOrder = "asc" | "desc";
 
 interface ViewPreferences {
