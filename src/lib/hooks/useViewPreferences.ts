@@ -5,13 +5,17 @@ type ViewLayout = "compact" | "comfortable" | "list";
 type GroupBy = "none" | "server" | "health" | "dbType" | string;
 type SortBy =
   | "name"
+  | "cpuUsage"
   | "severity"
   | "dbType"
   | "changes"
   | "events"
   | "totalTime"
   | "executions"
-  | "responseTime";
+  | "responseTime"
+  | "alerts"
+  | "status"
+  | "diskIO";
 type SortOrder = "asc" | "desc";
 
 interface ViewPreferences {
