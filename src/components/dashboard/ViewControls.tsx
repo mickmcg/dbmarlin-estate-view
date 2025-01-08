@@ -24,18 +24,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { SortBy } from "./InstanceGrid";
 
 type ViewLayout = "compact" | "comfortable" | "list";
 type GroupBy = "none" | "server" | "health" | "dbType" | string;
-type SortBy =
-  | "name"
-  | "severity"
-  | "dbType"
-  | "changes"
-  | "events"
-  | "totalTime"
-  | "executions"
-  | "responseTime";
 type SortOrder = "asc" | "desc";
 
 const TAG_KEYS = ["env", "app", "dc", "customer"];
@@ -49,7 +41,7 @@ interface ViewControlsProps {
   onGroupByChange?: (groupBy: GroupBy) => void;
   onSortByChange?: (sortBy: SortBy) => void;
   onSortOrderChange?: (order: SortOrder) => void;
-  onSortChange?: (field: string) => void;
+  onSortChange?: (field: SortBy) => void;
 }
 
 const ViewControls = ({
@@ -171,6 +163,10 @@ const ViewControls = ({
               <SelectItem value="totalTime">Total Time</SelectItem>
               <SelectItem value="executions">Executions</SelectItem>
               <SelectItem value="responseTime">Avg Response</SelectItem>
+              <SelectItem value="cpuUsage">CPU Usage</SelectItem>
+              <SelectItem value="diskIO">Disk I/O</SelectItem>
+              <SelectItem value="alerts">Alerts</SelectItem>
+              <SelectItem value="status">Status</SelectItem>
             </SelectContent>
           </Select>
           <Button
