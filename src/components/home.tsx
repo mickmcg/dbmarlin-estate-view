@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from "react";
-import type { Instance, InstanceStatus } from "./dashboard/InstanceGrid";
+import React, { useState } from "react";
+import type {
+  Instance,
+  InstanceStatus,
+  SortBy,
+} from "./dashboard/InstanceGrid";
 import DashboardHeader from "./dashboard/DashboardHeader";
 import ViewControls from "./dashboard/ViewControls";
 import InstanceGrid from "./dashboard/InstanceGrid";
@@ -91,7 +95,7 @@ const Home = () => {
     setIsGroupDetailsOpen(true);
   };
 
-  const handleSortChange = (field: string) => {
+  const handleSortChange = (field: SortBy) => {
     if (field === preferences.sortBy) {
       updatePreference(
         "sortOrder",

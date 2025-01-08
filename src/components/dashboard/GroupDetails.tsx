@@ -35,6 +35,21 @@ interface GroupDetailsProps {
   onClose?: () => void;
 }
 
+const getStatusBadgeClass = (status: InstanceStatus) => {
+  switch (status) {
+    case "healthy":
+      return "bg-green-500 hover:bg-green-500/90 text-white border-0";
+    case "warning":
+      return "bg-orange-500 hover:bg-orange-500/90 text-white border-0";
+    case "critical":
+      return "bg-red-500 hover:bg-red-500/90 text-white border-0";
+    case "offline":
+      return "bg-gray-500 hover:bg-gray-500/90 text-white border-0";
+    default:
+      return "";
+  }
+};
+
 const ListHeader = ({
   sortBy,
   onSortChange,
@@ -120,88 +135,12 @@ const ListHeader = ({
   );
 };
 
-const generateTimeData = (instances: Instance[]) => {
-  return Array.from({ length: 24 }, (_, i) => {
-    const hour = `${i}:00`;
-    return {
-      time: hour,
-      ...instances.reduce((acc, instance, idx) => {
-        acc[`cpu${idx}`] = Math.max(
-          0,
-          instance.cpuUsage + Math.floor(Math.random() * 40) - 20,
-        );
-        acc[`disk${idx}`] = Math.max(
-          0,
-          instance.diskIO + Math.floor(Math.random() * 40) - 20,
-        );
-        acc[`response${idx}`] = Math.max(
-          0,
-          instance.responseTime + Math.floor(Math.random() * 100) - 50,
-        );
-        acc[`total${idx}`] = Math.max(
-          60,
-          90 + Math.floor(Math.random() * 40) - 20,
-        );
-        return acc;
-      }, {}),
-    };
-  });
-};
-
 const parseTimeToSeconds = (timeStr: string): number => {
   const hours = parseInt(timeStr.match(/(\d+)h/)?.[1] || "0");
   const minutes = parseInt(timeStr.match(/(\d+)m/)?.[1] || "0");
   const seconds = parseInt(timeStr.match(/(\d+)s/)?.[1] || "0");
 
   return hours * 3600 + minutes * 60 + seconds;
-};
-
-const sortInstances = (
-  instances: Instance[],
-  sortBy: SortBy,
-  sortOrder: "asc" | "desc",
-) => {
-  const compareValues = (
-    a: Instance,
-    b: Instance,
-    field: keyof Instance,
-  ): number => {
-    if (field === "totalTime") {
-      return (
-        parseTimeToSeconds(a[field] as string) -
-        parseTimeToSeconds(b[field] as string)
-      );
-    }
-    if (typeof a[field] === "number" && typeof b[field] === "number") {
-      return (a[field] as number) - (b[field] as number);
-    }
-    return 0;
-  };
-
-  return [...instances].sort((a, b) => {
-    let comparison = 0;
-    switch (sortBy) {
-      case "name":
-        comparison = a.name.localeCompare(b.name);
-        break;
-      case "severity":
-      case "status":
-        const severityOrder: Record<InstanceStatus, number> = {
-          healthy: 0,
-          warning: 1,
-          critical: 2,
-          offline: 3,
-        };
-        comparison = severityOrder[a.status] - severityOrder[b.status];
-        break;
-      case "dbType":
-        comparison = a.dbType.localeCompare(b.dbType);
-        break;
-      default:
-        comparison = compareValues(a, b, sortBy as keyof Instance);
-    }
-    return sortOrder === "asc" ? comparison : -comparison;
-  });
 };
 
 const GroupDetails = ({
@@ -212,8 +151,36 @@ const GroupDetails = ({
   onSortChange,
   onClose,
 }: GroupDetailsProps) => {
-  const timeData = generateTimeData(instances);
-  const sortedInstances = sortInstances(instances, sortBy, sortOrder);
+  const timeData = React.useMemo(() => {
+    return Array.from({ length: 24 }, (_, i) => {
+      const hour = `${i}:00`;
+      return {
+        time: hour,
+        ...instances.reduce(
+          (acc, instance, idx) => {
+            acc[`cpu${idx}`] = Math.max(
+              0,
+              instance.cpuUsage + Math.floor(Math.random() * 40) - 20,
+            );
+            acc[`disk${idx}`] = Math.max(
+              0,
+              instance.diskIO + Math.floor(Math.random() * 40) - 20,
+            );
+            acc[`response${idx}`] = Math.max(
+              0,
+              instance.responseTime + Math.floor(Math.random() * 100) - 50,
+            );
+            acc[`total${idx}`] = Math.max(
+              60,
+              90 + Math.floor(Math.random() * 40) - 20,
+            );
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
+      };
+    });
+  }, [instances]);
 
   const colors = [
     "#2563eb",
@@ -244,6 +211,40 @@ const GroupDetails = ({
     totalAlerts: instances.reduce((acc, i) => acc + i.alerts, 0),
     totalEvents: instances.reduce((acc, i) => acc + i.events, 0),
   };
+
+  const sortedInstances = React.useMemo(() => {
+    return [...instances].sort((a, b) => {
+      let comparison = 0;
+      switch (sortBy) {
+        case "name":
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case "severity":
+        case "status":
+          const severityOrder: Record<InstanceStatus, number> = {
+            healthy: 0,
+            warning: 1,
+            critical: 2,
+            offline: 3,
+          };
+          comparison = severityOrder[a.status] - severityOrder[b.status];
+          break;
+        case "dbType":
+          comparison = a.dbType.localeCompare(b.dbType);
+          break;
+        case "totalTime":
+          comparison =
+            parseTimeToSeconds(a.totalTime.toString()) -
+            parseTimeToSeconds(b.totalTime.toString());
+          break;
+        default:
+          if (typeof a[sortBy] === "number" && typeof b[sortBy] === "number") {
+            comparison = (a[sortBy] as number) - (b[sortBy] as number);
+          }
+      }
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+  }, [instances, sortBy, sortOrder]);
 
   return (
     <div className="h-[calc(100vh-120px)] flex flex-col">
@@ -421,31 +422,22 @@ const GroupDetails = ({
                 </Card>
               </div>
 
-              {/* Metrics Table */}
-              <Card className="p-4">
-                <h3 className="text-lg font-semibold mb-4">Instance Metrics</h3>
-                <div className="space-y-0">
-                  <ListHeader sortBy={sortBy} onSortChange={onSortChange} />
+              {/* Instance List */}
+              <Card>
+                <ListHeader sortBy={sortBy} onSortChange={onSortChange} />
+                <div className="divide-y">
                   {sortedInstances.map((instance) => (
                     <div
                       key={instance.id}
-                      className={`flex items-center h-14 hover:bg-accent/50 cursor-pointer text-sm border-b last:border-b-0 w-full ${instance.status === "healthy" ? "bg-green-50/50 dark:bg-green-500/5" : instance.status === "warning" ? "bg-yellow-50/50 dark:bg-yellow-500/5" : instance.status === "critical" ? "bg-red-50/50 dark:bg-red-500/5" : "bg-gray-50/50 dark:bg-gray-500/5"}`}
+                      className="flex items-center h-14 px-3 text-sm hover:bg-accent/50"
                     >
                       <div className="flex-[2] truncate pl-4">
                         <span className="font-medium">{instance.name}</span>
                       </div>
                       <div className="flex-1">
                         <Badge
-                          variant={
-                            instance.status === "healthy"
-                              ? "default"
-                              : instance.status === "warning"
-                                ? "secondary"
-                                : instance.status === "critical"
-                                  ? "destructive"
-                                  : "outline"
-                          }
-                          className="capitalize text-xs px-1.5 py-0"
+                          variant="secondary"
+                          className={`capitalize text-xs px-1.5 py-0 ${getStatusBadgeClass(instance.status)}`}
                         >
                           {instance.status}
                         </Badge>
@@ -503,22 +495,46 @@ const GroupDetails = ({
 
         <TabsContent value="events" className="flex-1 mt-0">
           <ScrollArea className="h-[calc(100vh-186px)]">
-            <div className="p-6 space-y-4">
+            <div className="p-6">
               <Card className="p-4">
-                <h3 className="text-lg font-semibold mb-4">Recent Events</h3>
+                <h3 className="text-lg font-semibold mb-4">Event History</h3>
                 <div className="space-y-4">
-                  {instances.map((instance) => (
+                  {Array.from({ length: 10 }).map((_, i) => (
                     <div
-                      key={instance.id}
+                      key={i}
                       className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
                     >
                       <div className="space-y-1">
-                        <div className="font-medium">{instance.name}</div>
+                        <div className="font-medium">
+                          {
+                            [
+                              "Schema Change",
+                              "Performance Alert",
+                              "Configuration Update",
+                              "Backup Completed",
+                            ][i % 4]
+                          }
+                        </div>
                         <div className="text-sm text-muted-foreground">
-                          {instance.events} events
+                          {i + 1} hour{i !== 0 ? "s" : ""} ago
                         </div>
                       </div>
-                      <Badge variant="outline">{instance.dbType}</Badge>
+                      <Badge
+                        variant="secondary"
+                        className={
+                          i % 3 === 0
+                            ? getStatusBadgeClass("critical")
+                            : i % 3 === 1
+                              ? getStatusBadgeClass("warning")
+                              : ""
+                        }
+                      >
+                        {i % 3 === 0
+                          ? "Critical"
+                          : i % 3 === 1
+                            ? "Warning"
+                            : "Info"}
+                      </Badge>
                     </div>
                   ))}
                 </div>
@@ -535,21 +551,38 @@ const GroupDetails = ({
                   Performance Recommendations
                 </h3>
                 <div className="space-y-4">
-                  {instances.map((instance) => (
-                    <div
-                      key={instance.id}
-                      className="flex items-center gap-4 border-b pb-4 last:border-0 last:pb-0"
-                    >
-                      <Code className="h-8 w-8 p-2 bg-primary/10 rounded-lg" />
-                      <div className="space-y-1 flex-1">
-                        <div className="font-medium">{instance.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          Consider optimizing queries with high execution time
-                        </div>
+                  <div className="flex items-center gap-4 border-b pb-4">
+                    <Database className="h-8 w-8 p-2 bg-primary/10 rounded-lg" />
+                    <div className="space-y-1 flex-1">
+                      <div className="font-medium">
+                        Optimize Query Performance
                       </div>
-                      <Badge>High Impact</Badge>
+                      <div className="text-sm text-muted-foreground">
+                        Consider adding an index for frequently accessed columns
+                      </div>
                     </div>
-                  ))}
+                    <Badge variant="secondary">High Impact</Badge>
+                  </div>
+                  <div className="flex items-center gap-4 border-b pb-4">
+                    <Activity className="h-8 w-8 p-2 bg-primary/10 rounded-lg" />
+                    <div className="space-y-1 flex-1">
+                      <div className="font-medium">Resource Utilization</div>
+                      <div className="text-sm text-muted-foreground">
+                        CPU usage consistently high, consider scaling resources
+                      </div>
+                    </div>
+                    <Badge variant="secondary">Medium Impact</Badge>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Clock className="h-8 w-8 p-2 bg-primary/10 rounded-lg" />
+                    <div className="space-y-1 flex-1">
+                      <div className="font-medium">Maintenance Window</div>
+                      <div className="text-sm text-muted-foreground">
+                        Schedule regular maintenance during off-peak hours
+                      </div>
+                    </div>
+                    <Badge variant="secondary">Low Impact</Badge>
+                  </div>
                 </div>
               </Card>
             </div>

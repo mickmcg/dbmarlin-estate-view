@@ -72,6 +72,21 @@ const getStatusColor = (status: InstanceStatus) => {
   return colors[status];
 };
 
+const getStatusBadgeClass = (status: InstanceStatus) => {
+  switch (status) {
+    case "healthy":
+      return "bg-green-500 hover:bg-green-500/90 text-white";
+    case "warning":
+      return "bg-orange-500 hover:bg-orange-500/90 text-white";
+    case "critical":
+      return "bg-red-500 hover:bg-red-500/90 text-white";
+    case "offline":
+      return "bg-gray-500 hover:bg-gray-500/90 text-white";
+    default:
+      return "";
+  }
+};
+
 const TileContent = ({
   name,
   status,
@@ -103,7 +118,7 @@ const TileContent = ({
       <div className="flex items-center gap-1">
         <Badge
           variant="outline"
-          className={`${statusColors.text} capitalize text-xs px-1.5 py-0`}
+          className={`capitalize text-xs px-1.5 py-0 ${getStatusBadgeClass(status)}`}
         >
           {status}
         </Badge>
@@ -189,16 +204,8 @@ const InstanceTile = (props: InstanceTileProps) => {
         </div>
         <div className="flex-1">
           <Badge
-            variant={
-              status === "healthy"
-                ? "success"
-                : status === "warning"
-                  ? "warning"
-                  : status === "critical"
-                    ? "destructive"
-                    : "outline"
-            }
-            className="capitalize text-xs px-1.5 py-0"
+            variant="outline"
+            className={`capitalize text-xs px-1.5 py-0 ${getStatusBadgeClass(status)}`}
           >
             {status}
           </Badge>

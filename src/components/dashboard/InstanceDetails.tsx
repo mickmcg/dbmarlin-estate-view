@@ -24,17 +24,32 @@ import {
   Legend,
 } from "recharts";
 
+interface InstanceDetailsProps {
+  instance: Instance;
+  onClose?: () => void;
+}
+
+const getStatusBadgeClass = (status: Instance["status"]) => {
+  switch (status) {
+    case "healthy":
+      return "bg-green-500 hover:bg-green-500/90 text-white border-0";
+    case "warning":
+      return "bg-orange-500 hover:bg-orange-500/90 text-white border-0";
+    case "critical":
+      return "bg-red-500 hover:bg-red-500/90 text-white border-0";
+    case "offline":
+      return "bg-gray-500 hover:bg-gray-500/90 text-white border-0";
+    default:
+      return "";
+  }
+};
+
 const generateMockTimeData = (baseValue: number, points = 24) => {
   return Array.from({ length: points }, (_, i) => ({
     time: `${i}:00`,
     value: Math.max(0, baseValue + Math.floor(Math.random() * 40) - 20),
   }));
 };
-
-interface InstanceDetailsProps {
-  instance: Instance;
-  onClose?: () => void;
-}
 
 const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
   const cpuData = React.useMemo(
@@ -60,16 +75,8 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-semibold">{instance.name}</h2>
                 <Badge
-                  variant={
-                    instance.status === "healthy"
-                      ? "default"
-                      : instance.status === "warning"
-                        ? "secondary"
-                        : instance.status === "critical"
-                          ? "destructive"
-                          : "outline"
-                  }
-                  className="capitalize"
+                  variant="secondary"
+                  className={`capitalize ${getStatusBadgeClass(instance.status)}`}
                 >
                   {instance.status}
                 </Badge>
@@ -253,7 +260,12 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
                           15 minutes ago
                         </div>
                       </div>
-                      <Badge variant="destructive">Critical</Badge>
+                      <Badge
+                        variant="secondary"
+                        className={getStatusBadgeClass("critical")}
+                      >
+                        Critical
+                      </Badge>
                     </div>
                   </div>
                 </Card>
@@ -273,7 +285,12 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
                             CPU usage above 80% for 5 minutes
                           </div>
                         </div>
-                        <Badge variant="destructive">Critical</Badge>
+                        <Badge
+                          variant="secondary"
+                          className={getStatusBadgeClass("critical")}
+                        >
+                          Critical
+                        </Badge>
                       </div>
                     )}
                   </div>
@@ -310,12 +327,13 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
                         </div>
                       </div>
                       <Badge
-                        variant={
+                        variant="secondary"
+                        className={
                           i % 3 === 0
-                            ? "destructive"
+                            ? getStatusBadgeClass("critical")
                             : i % 3 === 1
-                              ? "secondary"
-                              : "default"
+                              ? getStatusBadgeClass("warning")
+                              : ""
                         }
                       >
                         {i % 3 === 0
@@ -350,7 +368,7 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
                         Consider adding an index for frequently accessed columns
                       </div>
                     </div>
-                    <Badge>High Impact</Badge>
+                    <Badge variant="secondary">High Impact</Badge>
                   </div>
                   <div className="flex items-center gap-4 border-b pb-4">
                     <Activity className="h-8 w-8 p-2 bg-primary/10 rounded-lg" />
@@ -360,7 +378,7 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
                         CPU usage consistently high, consider scaling resources
                       </div>
                     </div>
-                    <Badge>Medium Impact</Badge>
+                    <Badge variant="secondary">Medium Impact</Badge>
                   </div>
                   <div className="flex items-center gap-4">
                     <Clock className="h-8 w-8 p-2 bg-primary/10 rounded-lg" />
@@ -370,7 +388,7 @@ const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
                         Schedule regular maintenance during off-peak hours
                       </div>
                     </div>
-                    <Badge>Low Impact</Badge>
+                    <Badge variant="secondary">Low Impact</Badge>
                   </div>
                 </div>
               </Card>
