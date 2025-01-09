@@ -7,7 +7,13 @@ import type {
 import DashboardHeader from "./dashboard/DashboardHeader";
 import ViewControls from "./dashboard/ViewControls";
 import InstanceGrid from "./dashboard/InstanceGrid";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import InstanceDetails from "./dashboard/InstanceDetails";
 import GroupDetails from "./dashboard/GroupDetails";
 import { useViewPreferences } from "@/lib/hooks/useViewPreferences";
@@ -179,9 +185,14 @@ const Home = () => {
       <Sheet open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <SheetContent
           side="right"
-          className="!max-w-[100vw] w-[800px] sm:w-[1200px] lg:w-[1600px] p-0"
+          className="!max-w-[100vw] w-[800px] sm:w-[1200px] lg:w-[1600px] p-0 overflow-y-auto"
         >
-          <div className="border-b" />
+          <SheetHeader className="sr-only">
+            <SheetTitle>Instance Details</SheetTitle>
+            <SheetDescription>
+              View and manage instance details
+            </SheetDescription>
+          </SheetHeader>
           {selectedInstance && (
             <InstanceDetails
               instance={selectedInstance}
@@ -194,9 +205,12 @@ const Home = () => {
       <Sheet open={isGroupDetailsOpen} onOpenChange={setIsGroupDetailsOpen}>
         <SheetContent
           side="right"
-          className="!max-w-[100vw] w-[800px] sm:w-[1200px] lg:w-[1600px] p-0"
+          className="!max-w-[100vw] w-[800px] sm:w-[1200px] lg:w-[1600px] p-0 overflow-y-auto"
         >
-          <div className="border-b" />
+          <SheetHeader className="sr-only">
+            <SheetTitle>Group Details</SheetTitle>
+            <SheetDescription>View and manage group details</SheetDescription>
+          </SheetHeader>
           {selectedGroup && (
             <GroupDetails
               groupName={selectedGroup.name}
