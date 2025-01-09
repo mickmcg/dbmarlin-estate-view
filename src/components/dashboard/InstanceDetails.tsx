@@ -49,7 +49,7 @@ const generateMockTimeData = (baseValue: number, points = 24) => {
   }));
 };
 
-const InstanceDetails = ({ instance, onClose }) => {
+const InstanceDetails = ({ instance, onClose }: InstanceDetailsProps) => {
   const cpuData = React.useMemo(
     () => generateMockTimeData(instance.cpuUsage),
     [instance.cpuUsage],
